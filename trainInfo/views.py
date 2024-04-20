@@ -20,11 +20,10 @@ def book_seat(request):
     # Using atomic transaction to ensure that booking process is atomic
     with transaction.atomic():
         # Find an available seat
-        try:
-            seat = Seat.objects.select_for_update().filter(is_booked=False).first()
-        except Seat.DoesNotExist:
+        seat = Seat.objects.select_for_update().filter(is_booked=False).first()
+        if seat is None:
             return Response(
-                {"error": "No seats available."}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "No seats available."}, status=status.HTTP_200_OK
             )
 
         # Create a booking for the available seat
