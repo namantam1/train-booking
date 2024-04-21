@@ -1,18 +1,24 @@
 volumes:
   postgres_data:
 
-# networks:
-#   app_net:
-#     driver: bridge
-
 services:
-  web:
+  web1:
     build: .
-    command: gunicorn trainBooking.wsgi:application --bind 0.0.0.0:8000
-    # networks:
-    #   - app_net
-    # ports:
-    #   - "8000:8000"
+    command: gunicorn trainBooking.wsgi:application --bind 0.0.0.0:8000 -w 3
+    ports:
+      - 9000:8000
+    environment:
+      DATABASE_URL: psql://train-admin:train-admin@db/train-booking
+  web2:
+    build: .
+    command: gunicorn trainBooking.wsgi:application --bind 0.0.0.0:8000 -w 3
+    environment:
+      DATABASE_URL: psql://train-admin:train-admin@db/train-booking
+  web3:
+    build: .
+    command: gunicorn trainBooking.wsgi:application --bind 0.0.0.0:8000 -w 3
+    environment:
+      DATABASE_URL: psql://train-admin:train-admin@db/train-booking
 
   db:
     image: postgres:latest
@@ -22,9 +28,6 @@ services:
       POSTGRES_PASSWORD: train-admin
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    # networks:
-    #   - app_net
-
 
   nginx:
     image: nginx:latest
@@ -33,6 +36,6 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - web
-    # networks:
-    #   - app_net
+      - web1
+      - web2
+      - web3
