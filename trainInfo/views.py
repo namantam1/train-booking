@@ -1,36 +1,31 @@
-from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Booking, Train, Seat
-from django.db import transaction
-from .serializers import BookingSerializer, TrainSerializer
+from rest_framework import status
+from .models import get_seats, Booking
 
 
 @api_view(["GET"])
 def get_trains(request):
-    trains = Train.objects.all()
-    serializer = TrainSerializer(trains, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    source_id = request.query_params.get("source_id")
+    destination_id = request.query_params.get("destination_id")
+    print(source_id, destination_id)
+    data = []
+    for el in get_seats(source_id, destination_id):
+        data.append(
+            dict(
+                train_name=el.train_name,
+                total_seats=el.total_seats,
+                booked_seats=el.booked_seats,
+                available_seats=el.available_seats,
+            )
+        )
+    return Response(data=data, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
 def book_seat(request):
-    user_id = request.data.get("user_id")
+    source = request.data.get("source")
+    destination = request.data.get("destination")
+    train = request.data.get("train")
 
-    # Using atomic transaction to ensure that booking process is atomic
-    with transaction.atomic():
-        # Find an available seat
-        try:
-            seat = Seat.objects.select_for_update().filter(is_booked=False).first()
-        except Seat.DoesNotExist:
-            return Response(
-                {"error": "No seats available."}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Create a booking for the available seat
-        booking = Booking.objects.create(seat=seat, user_id=user_id)
-        seat.is_booked = True
-        seat.save()
-
-    serializer = BookingSerializer(booking)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    Booking.objects.create()
