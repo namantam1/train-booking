@@ -8,3 +8,5 @@
 - The number of fetching seats info is more than booking made.
 - When a user search trains between two station we are assuming that there 
   would be maximum 30 trains would be there.
+
+seat rows for each train = 30 * 50 * 2000 = 30,00,000

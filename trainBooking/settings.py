@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "trainInfo",
     "rest_framework",
     "idea1",
+    "idea2",
 ]
 
 MIDDLEWARE = [

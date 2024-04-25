@@ -126,3 +126,31 @@ def generate():
             for s in range(5)
         ]
         print(seats)
+
+
+def fetch(source="Station 1", destination="Station 3"):
+    # Get all stops where the station name matches either the source or destination
+    source_stops = Stop.objects.filter(station_name=source)
+    destination_stops = Stop.objects.filter(station_name=destination)
+
+    # Get subqueries for the arrival times of the source and destination stops
+    source_arrival_time = Subquery(
+        source_stops.filter(train=OuterRef("pk")).values("arrival_time")[:1]
+    )
+    destination_arrival_time = Subquery(
+        destination_stops.filter(train=OuterRef("pk")).values("arrival_time")[:1]
+    )
+
+    # Filter trains based on stops matching the source and destination
+    # Ensure the order of stops is maintained by comparing arrival times
+    trains = (
+        Train.objects.filter(stop__in=source_stops)
+        .filter(stop__in=destination_stops)
+        .annotate(
+            source_arrival_time=source_arrival_time,
+            destination_arrival_time=destination_arrival_time,
+        )
+        .filter(source_arrival_time__lt=destination_arrival_time)
+    )
+
+    return trains
