@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import fetch_seats, book_seat as _book_seat
+from .models import fetch_seats, book_seat as _book_seat, Stop, Train
 
 
 @api_view(["GET"])
@@ -10,6 +10,34 @@ def get_trains(request):
     destination = request.query_params.get("destination")
     print(source, destination)
     data = fetch_seats(source, destination, cast=True)
+    return Response(data=data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def get_trains_routes(request):
+    trains = Train.objects.all().prefetch_related("stop_set")[:10]
+    data = [
+        dict(
+            train=train.name,
+            seats_count=train.seats_count,
+            stops=train.stop_set.order_by("arrival_time").values(
+                "station__name", "arrival_time", "departure_time"
+            ),
+        )
+        for train in trains
+    ]
+    return Response(data=data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def get_trains_routes_by_train(request):
+    train = request.query_params.get("train")
+    data = (
+        Stop.objects.filter(train__name=train)
+        .order_by("arrival_time")
+        .values("train__name", "station__name", "arrival_time", "departure_time")
+    )
+
     return Response(data=data, status=status.HTTP_200_OK)
 
 
