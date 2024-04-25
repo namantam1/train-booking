@@ -6,13 +6,13 @@ name = "pypi"
 [packages]
 django = "*"
 djangorestframework = "*"
-locust = "*"
 psycopg2-binary = "*"
 django-environ = "*"
 django-debug-toolbar = "*"
 
 [dev-packages]
 ipython = "*"
+locust = "*"
 
 [requires]
 python_version = "3.8"

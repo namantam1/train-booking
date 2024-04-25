@@ -3,8 +3,19 @@ version: "3"
 services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn trainBooking.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/code
     ports:
       - "8000:8000"
+    environment:
+      DATABASE_URL: psql://train-admin:train-admin@db/train-booking
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: train-booking
+      POSTGRES_USER: train-admin
+      POSTGRES_PASSWORD: train-admin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
