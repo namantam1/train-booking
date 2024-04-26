@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import *
 from datetime import timedelta, datetime, timezone
@@ -139,26 +139,31 @@ def fetch_seats(source="Station 1", destination="Station 3", cast=False):
 
     return trains
 
-
+@transaction.atomic
 def book_seat(train="Train 1", source="Station 1", destination="Station 3"):
-    train = Train.objects.get(name=train)
-    source_stop = Stop.objects.get(station__name=source, train=train)
-    destination_stop = Stop.objects.get(station__name=destination, train=train)
-    stops = Stop.objects.filter(
-        train=train,
-        arrival_time__gte=source_stop.arrival_time,
-        arrival_time__lte=destination_stop.arrival_time,
-    )
-    seats_booked = stops.values_list("seats_booked", flat=True)
-    seats_booked = map(set, seats_booked)
-    seats = set(range(1, train.seats_count + 1))
-    for seat_booked in seats_booked:
-        seats -= seat_booked
+    try:
+        train = Train.objects.get(name=train)
+        source_stop = Stop.objects.get(station__name=source, train=train)
+        destination_stop = Stop.objects.get(station__name=destination, train=train)
+        stops = Stop.objects.filter(
+            train=train,
+            arrival_time__gte=source_stop.arrival_time,
+            arrival_time__lte=destination_stop.arrival_time,
+        )
+        stops.select_for_update()
+        seats_booked = stops.values_list("seats_booked", flat=True)
+        seats_booked = map(set, seats_booked)
+        seats = set(range(1, train.seats_count + 1))
+        for seat_booked in seats_booked:
+            seats -= seat_booked
 
-    if len(seats) != 0:
-        seat = seats.pop()
-        return stops.update(seats_booked=ArrayAppend("seats_booked", seat))
-
+        if len(seats) != 0:
+            seat = seats.pop()
+            return stops.update(seats_booked=ArrayAppend("seats_booked", seat))
+        
+        return "All seats already booked"
+    except (Stop.DoesNotExist, Train.DoesNotExist) as ex:
+        return ex.args
 
 def fetch_seats_for_train(train="Train 1", source="Station 1", destination="Station 3"):
     source = Stop.objects.get(station__name=source, train__name=train)

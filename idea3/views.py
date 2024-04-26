@@ -8,7 +8,6 @@ from .models import fetch_seats, book_seat as _book_seat, Stop, Train
 def get_trains(request):
     source = request.query_params.get("source")
     destination = request.query_params.get("destination")
-    print(source, destination)
     data = fetch_seats(source, destination, cast=True)
     return Response(data=data, status=status.HTTP_200_OK)
 
