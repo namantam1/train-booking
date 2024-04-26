@@ -58,6 +58,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -138,6 +139,7 @@ DATETIME_FORMAT = "%Y-%m-%d%H:%M:%SSS"
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -149,5 +151,13 @@ INTERNAL_IPS = [
     # ...
     "127.0.0.1",
     "localhost",
+    "improved-journey-65pjr7wp76rcq95-8000.app.github.dev"
     # ...
 ]
+
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}

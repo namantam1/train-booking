@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "95b7d75caa22e8a6a1c9cc130a67bd8495a1327d13566f226addd479d8b771fc"
+            "sha256": "acb8454a8111305359f2a08c070d97c3f5f5b41cca7d7b14ee4bd6530533abd2"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -176,17 +176,18 @@
             ],
             "markers": "python_version < '3.11'",
             "version": "==4.11.0"
+        },
+        "whitenoise": {
+            "hashes": [
+                "sha256:8998f7370973447fac1e8ef6e8ded2c5209a7b1f67c1012866dbcd09681c3251",
+                "sha256:b1f9db9bf67dc183484d760b99f4080185633136a273a03f6436034a41064146"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==6.6.0"
         }
     },
     "develop": {
-        "appnope": {
-            "hashes": [
-                "sha256:1de3860566df9caf38f01f86f65e0e13e379af54f9e4bee1e66b48f2efffd1ee",
-                "sha256:502575ee11cd7a28c0205f379b525beefebab9d161b7c964670864014ed7213c"
-            ],
-            "markers": "sys_platform == 'darwin'",
-            "version": "==0.1.4"
-        },
         "asttokens": {
             "hashes": [
                 "sha256:051ed49c3dcae8913ea7cd08e46a606dba30b79993209636c4875bc1d637bc24",
