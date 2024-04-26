@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db.models import *
 from datetime import timedelta, datetime, timezone
 from random import randint, sample
+import json
 
 
 class ArrayAppend(Func):
@@ -139,6 +140,7 @@ def fetch_seats(source="Station 1", destination="Station 3", cast=False):
 
     return trains
 
+
 @transaction.atomic
 def book_seat(train="Train 1", source="Station 1", destination="Station 3"):
     try:
@@ -160,10 +162,11 @@ def book_seat(train="Train 1", source="Station 1", destination="Station 3"):
         if len(seats) != 0:
             seat = seats.pop()
             return stops.update(seats_booked=ArrayAppend("seats_booked", seat))
-        
+
         return "All seats already booked"
     except (Stop.DoesNotExist, Train.DoesNotExist) as ex:
         return ex.args
+
 
 def fetch_seats_for_train(train="Train 1", source="Station 1", destination="Station 3"):
     source = Stop.objects.get(station__name=source, train__name=train)
@@ -215,6 +218,7 @@ def generate_bulk_data():
     print("Stations=", len(stations))
 
     stops = []
+    json_data = []
     for train, hr in zip(trains, hrs):
         h, d = hr
         ref = datetime(2022, 1, 1, tzinfo=timezone.utc)
@@ -227,6 +231,12 @@ def generate_bulk_data():
             stations, stops_count, list(range(0, stations_count, 500)), 10
         )
 
+        json_data.append(
+            {
+                "train": train.name,
+                "stops": list(map(lambda station: station.name, stop_stations)),
+            }
+        )
         for station in stop_stations:
             stops.append(
                 Stop(
@@ -240,3 +250,6 @@ def generate_bulk_data():
 
     stops = Stop.objects.bulk_create(stops, 10000)
     print("Stops=", len(stops))
+
+    with open("data.json", "w") as fp:
+        json.dump(json_data, fp)
