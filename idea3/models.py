@@ -223,12 +223,8 @@ def generate_bulk_data():
         h, d = hr
         ref = datetime(2022, 1, 1, tzinfo=timezone.utc)
         stops_count = randint(min_stop_count, max_stops_count)
-
-        # stop_stations = sample(stations, stops_count)
-        # indices = sample(range(len(stations)), stops_count)
-        # stop_stations = [stations[i] for i in sorted(indices)]
         stop_stations = select_elements_with_priority(
-            stations, stops_count, list(range(0, stations_count, 500)), 10
+            stations, stops_count, list(range(0, stations_count, 500)), 0
         )
 
         json_data.append(
@@ -252,4 +248,4 @@ def generate_bulk_data():
     print("Stops=", len(stops))
 
     with open("data.json", "w") as fp:
-        json.dump(json_data, fp)
+        json.dump(json_data, fp, indent=2)
